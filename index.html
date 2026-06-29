@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>hey, dhruv</title>
+<meta name="description" content="Dhruv — rider, wanderer, story collector. Yamaha R3, neon nights, and the roads in between." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#08090E; --panel:#0E1119; --panel-2:#141926;
+    --line:rgba(150,162,186,.12); --line-2:rgba(150,162,186,.24);
+    --text:#ECEEF4; --muted:#8A93A6;
+    --hot:#FF6A3D; --ice:#39DAD8;
+    --disp:'Space Grotesk', system-ui, sans-serif;
+    --body:'Inter', system-ui, sans-serif;
+    --maxw:1240px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--ink);color:var(--text);
+    font-family:var(--body);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  a{color:inherit;text-decoration:none}
+  ::selection{background:var(--hot);color:#fff}
+  body::after{content:"";position:fixed;inset:0;z-index:60;pointer-events:none;opacity:.03;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+  /* NAV */
+  .nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;padding:18px clamp(18px,4vw,46px);transition:.4s}
+  .nav.solid{background:rgba(8,9,14,.72);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);padding-top:13px;padding-bottom:13px}
+  .brand{font-family:var(--disp);font-weight:700;font-size:19px;letter-spacing:-.01em}
+  .brand i{color:var(--hot);font-style:normal}
+  .links{margin-left:auto;display:flex;gap:26px;font-size:14px}
+  .links a{color:var(--muted);transition:color .2s}
+  .links a:hover,.links a:focus-visible{color:var(--text);outline:none}
+  @media (max-width:720px){.links{display:none}}
+
+  /* SCENES — gradient is the fallback; a real photo (img.ph) sits on top when present */
+  .scene{position:absolute;inset:0;background-size:cover;background-position:center;overflow:hidden}
+  .scene>img.ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+  .s-vegas{background:radial-gradient(55% 45% at 50% 88%, rgba(255,60,140,.55), transparent 62%),radial-gradient(46% 40% at 76% 56%, rgba(57,218,216,.42), transparent 60%),linear-gradient(180deg,#05060B 0%,#0B0F1E 58%,#15122B 100%)}
+  .s-road{background:radial-gradient(50% 60% at 50% 96%, rgba(255,106,61,.5), transparent 56%),linear-gradient(180deg,#05070D 0%,#0A1020 68%,#101A2E 100%)}
+  .s-desert{background:radial-gradient(68% 50% at 30% 30%, rgba(255,150,80,.4), transparent 56%),linear-gradient(180deg,#0A0805 0%,#1B1308 58%,#2C1E10 100%)}
+  .s-canyon{background:radial-gradient(60% 50% at 42% 72%, rgba(255,90,50,.45), transparent 56%),linear-gradient(180deg,#070504 0%,#1B0E08 58%,#2E170E 100%)}
+  .s-peak{background:radial-gradient(58% 42% at 60% 24%, rgba(120,180,255,.34), transparent 56%),linear-gradient(180deg,#05080F 0%,#0C1426 58%,#16233B 100%)}
+  .s-coast{background:radial-gradient(58% 42% at 72% 30%, rgba(57,218,216,.34), transparent 56%),linear-gradient(180deg,#04080C 0%,#08161E 58%,#0E2630 100%)}
+
+  /* HERO */
+  .hero{position:relative;height:100svh;overflow:hidden;display:grid;place-items:center;text-align:center}
+  .hero .scene{animation:kb 30s ease-in-out infinite alternate}
+  @keyframes kb{from{transform:scale(1.06)}to{transform:scale(1.16) translateY(-1.5%)}}
+  .aura{position:absolute;width:44vmax;height:44vmax;border-radius:50%;filter:blur(100px);opacity:.22;pointer-events:none;will-change:transform;z-index:1}
+  .aura.a{top:-12vmax;left:-8vmax;background:var(--hot)}
+  .aura.b{bottom:-16vmax;right:-10vmax;background:var(--ice);opacity:.16}
+  .hero::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(8,9,14,.3),rgba(8,9,14,.15) 40%,rgba(8,9,14,.85))}
+  .hero-in{position:relative;z-index:3;padding:0 22px;will-change:transform,opacity}
+  .eyebrow{font-family:var(--disp);font-size:12px;letter-spacing:.34em;text-transform:uppercase;color:var(--ice);margin:0 0 22px;font-weight:600}
+  .hero h1{font-family:var(--disp);font-weight:700;font-size:clamp(52px,12vw,150px);line-height:.9;letter-spacing:-.035em;margin:0}
+  .hero h1 em{font-style:normal;background:linear-gradient(100deg,var(--hot),#FF3D8B);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero .sub{font-size:clamp(16px,2.2vw,22px);color:#C5CCDB;margin:26px auto 0;max-width:34ch}
+  .cue{position:absolute;bottom:34px;left:50%;transform:translateX(-50%);z-index:3;font-family:var(--disp);font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#C5CCDB;opacity:.85;display:flex;flex-direction:column;align-items:center;gap:10px}
+  .cue span{width:1px;height:46px;background:linear-gradient(var(--ice),transparent);animation:fall 1.8s ease-in-out infinite}
+  @keyframes fall{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+  /* SECTIONS */
+  .sec{padding:clamp(80px,15vh,170px) 0;position:relative;border-top:1px solid var(--line)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,46px)}
+  .kicker{font-family:var(--disp);font-size:12px;letter-spacing:.28em;text-transform:uppercase;font-weight:600;color:var(--hot);margin:0 0 20px;display:flex;align-items:center;gap:12px}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--hot)}
+  .big{font-family:var(--disp);font-weight:600;font-size:clamp(30px,6vw,68px);line-height:1.02;letter-spacing:-.025em;max-width:16ch;margin:0}
+  .big em{font-style:normal;color:var(--hot)}
+  .manifesto{font-family:var(--disp);font-weight:500;font-size:clamp(28px,5.4vw,62px);line-height:1.1;letter-spacing:-.02em;max-width:20ch;margin:0}
+  .manifesto .line{display:block;overflow:hidden}
+  .manifesto .line>span{display:block}
+  .manifesto em{font-style:normal;color:var(--ice)}
+
+  /* PINNED JOURNEY */
+  .pin{height:360vh;position:relative}
+  .stage{position:sticky;top:0;height:100svh;overflow:hidden}
+  .stage .scene{transition:opacity 1.1s ease, transform 1.1s ease;opacity:0;transform:scale(1.12)}
+  .stage .scene.on{opacity:1;transform:scale(1.02)}
+  .stage::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(8,9,14,.55),rgba(8,9,14,.2) 45%,rgba(8,9,14,.85))}
+  .cap{position:absolute;inset:0;z-index:2;display:grid;place-items:center;text-align:center;padding:0 24px}
+  .cap .panel{opacity:0;transform:translateY(26px);transition:.8s ease;max-width:24ch;position:absolute}
+  .cap .panel.on{opacity:1;transform:none;position:relative}
+  .cap .num{font-family:var(--disp);font-size:12px;letter-spacing:.3em;color:var(--ice);font-weight:600;margin:0 0 16px}
+  .cap h3{font-family:var(--disp);font-weight:700;font-size:clamp(34px,7.5vw,96px);line-height:.94;letter-spacing:-.035em;margin:0}
+  .cap p{font-size:clamp(15px,2vw,20px);color:#C5CCDB;margin:20px auto 0;max-width:30ch}
+  .ride-stats{display:flex;gap:clamp(22px,5vw,68px);justify-content:center;margin-top:34px;flex-wrap:wrap}
+  .ride-stats span{font-family:var(--disp);font-weight:700;font-size:clamp(30px,5vw,54px);display:block;line-height:1}
+  .ride-stats small{font-family:var(--disp);font-weight:500;font-size:12px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;display:block;margin-top:8px}
+  .pbar{position:absolute;left:0;bottom:0;height:3px;background:linear-gradient(90deg,var(--hot),#FF3D8B);width:0;z-index:3}
+
+  /* ADVENTURES */
+  .chapter{display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,5vw,72px);align-items:center;margin-top:clamp(56px,9vw,116px)}
+  .chapter:first-of-type{margin-top:48px}
+  .chapter.flip .media{order:2}
+  .chapter .media{position:relative;height:clamp(320px,52vw,540px);border-radius:18px;overflow:hidden;border:1px solid var(--line);box-shadow:0 40px 90px rgba(0,0,0,.5)}
+  .chapter .media .scene{transform:scale(1.18);will-change:transform}
+  .chapter .badge{position:absolute;top:16px;left:16px;z-index:2;background:rgba(8,9,14,.6);border:1px solid var(--line-2);color:#fff;font-family:var(--disp);font-size:12px;letter-spacing:.06em;padding:7px 13px;border-radius:50px;backdrop-filter:blur(8px)}
+  .chapter h3{font-family:var(--disp);font-weight:700;font-size:clamp(28px,4.4vw,50px);line-height:1.02;letter-spacing:-.025em;margin:0 0 14px}
+  .chapter .where{font-family:var(--disp);font-size:13px;color:var(--ice);letter-spacing:.04em;margin:0 0 18px}
+  .chapter p{margin:0;font-size:clamp(15px,1.7vw,18px);color:#B7BFCF;max-width:46ch}
+  @media (max-width:780px){.chapter{grid-template-columns:1fr;gap:22px}.chapter.flip .media{order:0}}
+
+  /* STORIES */
+  .story{border-top:1px solid var(--line);padding:clamp(28px,5vw,48px) 0;display:grid;grid-template-columns:auto 1fr auto;gap:clamp(18px,4vw,46px);align-items:center;cursor:pointer;transition:padding .3s}
+  .story:last-child{border-bottom:1px solid var(--line)}
+  .story:hover{padding-left:14px}
+  .story .yr{font-family:var(--disp);color:var(--muted);font-size:15px}
+  .story h3{font-family:var(--disp);font-weight:600;font-size:clamp(22px,3.6vw,40px);line-height:1.04;letter-spacing:-.02em;margin:0 0 8px}
+  .story p{margin:0;color:var(--muted);max-width:62ch}
+  .story .go{font-size:26px;color:var(--hot);transition:transform .3s}
+  .story:hover .go{transform:translateX(8px)}
+  @media (max-width:680px){.story{grid-template-columns:1fr;gap:8px}.story .go{display:none}}
+
+  /* FRAMES */
+  .reel-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap}
+  .reel{display:flex;gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;padding:38px 0 14px;cursor:grab;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .reel::-webkit-scrollbar{display:none}
+  .reel.drag{cursor:grabbing;scroll-snap-type:none}
+  .shot{flex:0 0 auto;width:min(74vw,420px);height:min(92vw,540px);border-radius:16px;overflow:hidden;position:relative;scroll-snap-align:center;border:1px solid var(--line);box-shadow:0 30px 70px rgba(0,0,0,.5)}
+  .shot:first-child{margin-left:max(0px,calc((100vw - var(--maxw))/2 + clamp(20px,5vw,46px)))}
+  .shot .scene{transition:transform .6s ease}
+  .shot:hover .scene{transform:scale(1.06)}
+  .shot .label{position:absolute;left:16px;bottom:16px;z-index:2;color:#fff;font-family:var(--disp);font-weight:600;font-size:17px;text-shadow:0 2px 18px rgba(0,0,0,.6)}
+  .shot::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(0deg,rgba(0,0,0,.55),transparent 50%)}
+  .hint{font-family:var(--disp);font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+
+  /* SHELF */
+  .book{display:grid;grid-template-columns:auto 1fr auto;gap:clamp(18px,4vw,40px);align-items:baseline;padding:24px 0;border-bottom:1px solid var(--line);transition:.25s}
+  .book:hover{padding-left:14px;background:linear-gradient(90deg,rgba(255,106,61,.06),transparent)}
+  .book .n{font-family:var(--disp);font-size:15px;color:var(--muted)}
+  .book h3{font-family:var(--disp);font-weight:600;font-size:clamp(19px,2.8vw,28px);margin:0;line-height:1.12}
+  .book h3 small{font-weight:400;font-family:var(--body);font-size:.62em;color:var(--muted);display:block;margin-top:4px}
+  .book .tag{font-family:var(--disp);font-size:12px;color:var(--ice);white-space:nowrap;letter-spacing:.04em}
+  @media (max-width:640px){.book{grid-template-columns:auto 1fr}.book .tag{display:none}}
+
+  /* INSTAGRAM */
+  .insta{text-align:center}
+  .insta h2{font-family:var(--disp);font-weight:700;font-size:clamp(32px,6vw,72px);letter-spacing:-.03em;margin:0 0 10px;line-height:.96}
+  .insta .handle{color:var(--ice);font-family:var(--disp);font-size:18px}
+  .ig{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin:44px 0 38px}
+  .ig a{aspect-ratio:1;border-radius:14px;overflow:hidden;position:relative;border:1px solid var(--line)}
+  .ig a .scene{transition:transform .4s}
+  .ig a:hover .scene{transform:scale(1.08)}
+  @media (max-width:640px){.ig{grid-template-columns:repeat(3,1fr)}}
+
+  .btn{display:inline-flex;align-items:center;gap:10px;font-family:var(--disp);font-weight:600;font-size:15px;padding:15px 28px;border-radius:50px;background:var(--hot);color:#fff;border:none;cursor:pointer;transition:.2s}
+  .btn:hover,.btn:focus-visible{transform:translateY(-3px);background:#ff7d56;outline:none}
+
+  /* FOOTER */
+  footer{padding:64px 0 80px;text-align:center;border-top:1px solid var(--line)}
+  footer .line{font-family:var(--disp);font-weight:500;font-size:clamp(22px,4.4vw,40px);letter-spacing:-.02em;margin:0 0 28px}
+  footer .meta{color:var(--muted);font-size:13px;letter-spacing:.04em;font-family:var(--disp)}
+  footer .meta b{color:var(--text)}
+
+  /* REVEAL */
+  .rv{opacity:0;transform:translateY(32px);transition:opacity .9s ease,transform .9s cubic-bezier(.2,.7,.2,1)}
+  .rv.in{opacity:1;transform:none}
+  .rv.d1{transition-delay:.08s}.rv.d2{transition-delay:.16s}.rv.d3{transition-delay:.24s}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+    .rv{opacity:1;transform:none}.stage .scene{opacity:1}.cap .panel{position:relative}
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav" id="nav">
+  <span class="brand">hey<i>.</i>dhruv</span>
+  <div class="links">
+    <a href="#journey">The Ride</a><a href="#adventures">Adventures</a><a href="#stories">Stories</a>
+    <a href="#frames">Frames</a><a href="#shelf">Shelf</a><a href="#insta">Instagram</a>
+  </div>
+</nav>
+
+<!-- HERO — drop a photo at img/hero.jpg to replace the gradient -->
+<header class="hero">
+  <div class="scene s-road" aria-hidden="true"><img class="ph" src="img/hero.jpg" alt="" onerror="this.remove()"></div>
+  <div class="aura a" aria-hidden="true"></div>
+  <div class="aura b" aria-hidden="true"></div>
+  <div class="hero-in" id="heroIn">
+    <p class="eyebrow">Rider · Wanderer · Story collector</p>
+    <h1>Hey, I'm<br><em>Dhruv.</em></h1>
+    <p class="sub">Some people collect things. I collect roads — usually at night, usually on two wheels.</p>
+  </div>
+  <div class="cue"><span></span>Scroll to ride along</div>
+</header>
+
+<section class="sec">
+  <div class="wrap">
+    <p class="manifesto">
+      <span class="line"><span class="rv">I chase neon,</span></span>
+      <span class="line"><span class="rv d1">wrong turns, and</span></span>
+      <span class="line"><span class="rv d2"><em>roads that don't end</em></span></span>
+      <span class="line"><span class="rv d3">where the map says they should.</span></span>
+    </p>
+  </div>
+</section>
+
+<!-- PINNED JOURNEY — optional photos: img/journey-1.jpg ... journey-3.jpg -->
+<section class="pin" id="journey">
+  <div class="stage">
+    <div class="scene s-road" data-scene="0"><img class="ph" src="img/journey-1.jpg" alt="" onerror="this.remove()"></div>
+    <div class="scene s-canyon" data-scene="1"><img class="ph" src="img/journey-2.jpg" alt="" onerror="this.remove()"></div>
+    <div class="scene s-peak" data-scene="2"><img class="ph" src="img/journey-3.jpg" alt="" onerror="this.remove()"></div>
+    <div class="cap">
+      <div class="panel" data-panel="0">
+        <p class="num">01 — THE MACHINE</p>
+        <h3>It starts with<br>the R3.</h3>
+        <p style="margin-bottom:6px;color:#9aa3b6;font-family:var(--disp);letter-spacing:.04em">Yamaha YZF-R3 · Monster Energy MotoGP Edition</p>
+        <div class="ride-stats">
+          <div><span class="count" data-to="321">0</span><small>cc · parallel twin</small></div>
+          <div><span class="count" data-to="42">0</span><small>horsepower</small></div>
+          <div><span class="count" data-to="180">0</span><small>km/h top speed</small></div>
+        </div>
+      </div>
+      <div class="panel" data-panel="1">
+        <p class="num">02 — THE ROAD</p>
+        <h3>Then the road<br>opens up.</h3>
+        <p>No schedule, no destination — just the next bend and whatever's behind it.</p>
+      </div>
+      <div class="panel" data-panel="2">
+        <p class="num">03 — THE HORIZON</p>
+        <h3>And you<br>don't look back.</h3>
+        <p>This is the whole reason. Everything else is just the story of getting here.</p>
+      </div>
+    </div>
+    <div class="pbar" id="pbar"></div>
+  </div>
+</section>
+
+<!-- ADVENTURES — photos: img/vegas.jpg, img/redrock.jpg, img/valley.jpg -->
+<section class="sec" id="adventures">
+  <div class="wrap">
+    <p class="kicker rv">The Logbook</p>
+    <h2 class="big rv">Places that<br>rewired me <em>a little.</em></h2>
+
+    <article class="chapter">
+      <div class="media rv"><div class="scene s-vegas" data-parallax><img class="ph" src="img/vegas.jpg" alt="Las Vegas at night" onerror="this.remove()"></div><span class="badge">Las Vegas · 2024</span></div>
+      <div class="rv d1">
+        <h3>Neon till 4 a.m.</h3>
+        <p class="where">Nevada · the Strip · zero sleep</p>
+        <p>Rolled into Vegas with a full tank and no plan. Spent the night chasing reflections of the Strip in the tank, then watched the desert swallow the lights on the way out. The city you come for; the silence after is the part you keep.</p>
+      </div>
+    </article>
+
+    <article class="chapter flip">
+      <div class="media rv"><div class="scene s-canyon" data-parallax><img class="ph" src="img/redrock.jpg" alt="Red Rock Canyon" onerror="this.remove()"></div><span class="badge">Red Rock · 2024</span></div>
+      <div class="rv d1">
+        <h3>Red Rock loop at sunrise</h3>
+        <p class="where">Nevada · 21 km of curves · 30 min from the Strip</p>
+        <p>Twenty minutes from the slot machines and suddenly it's just red sandstone and empty switchbacks. Best warm-up ride I've found anywhere — cold air, warm light, no traffic.</p>
+      </div>
+    </article>
+
+    <article class="chapter">
+      <div class="media rv"><div class="scene s-desert" data-parallax><img class="ph" src="img/valley.jpg" alt="Valley of Fire" onerror="this.remove()"></div><span class="badge">Valley of Fire · 2023</span></div>
+      <div class="rv d1">
+        <h3>Mars, but an hour away</h3>
+        <p class="where">Nevada · 90 min out · otherworldly</p>
+        <p>Valley of Fire feels like riding across another planet. Add as many of these chapters as you like — they alternate sides automatically.</p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- STORIES -->
+<section class="sec" id="stories">
+  <div class="wrap">
+    <p class="kicker rv">Tales from the Road</p>
+    <h2 class="big rv">The longer ones,<br>worth a <em>campfire.</em></h2>
+    <div style="margin-top:46px">
+      <article class="story rv"><span class="yr">'24</span>
+        <div><h3>The night the Strip went quiet</h3>
+          <p>4 a.m., last casino lights dimming, and for ten blocks it was just me and the hum of the R3. The loudest city in the world, holding its breath. I've never felt more awake.</p></div>
+        <span class="go">→</span></article>
+      <article class="story rv"><span class="yr">'24</span>
+        <div><h3>300 miles on a 321cc heart</h3>
+          <p>Everyone said the little R3 wasn't a touring bike. So naturally I pointed it at the horizon and didn't stop. Turns out the bike was never the limit — I was.</p></div>
+        <span class="go">→</span></article>
+      <article class="story rv"><span class="yr">'23</span>
+        <div><h3>A stranger, a gas station, a map I threw away</h3>
+          <p>Ran low on fuel in the middle of nowhere. A guy named Sal topped me off, drew a shortcut on my map, and waved me off. The shortcut was wrong. It was also the best road of the whole trip.</p></div>
+        <span class="go">→</span></article>
+    </div>
+  </div>
+</section>
+
+<!-- FRAMES — photos: img/frame-1.jpg ... img/frame-6.jpg -->
+<section class="sec" id="frames">
+  <div class="wrap reel-head">
+    <div><p class="kicker rv">The Reel</p><h2 class="big rv">Frames from<br>the saddle.</h2></div>
+    <p class="hint rv">← drag to scroll →</p>
+  </div>
+  <div class="reel" id="reel">
+    <figure class="shot"><div class="scene s-vegas"><img class="ph" src="img/frame-1.jpg" alt="" onerror="this.remove()"></div><figcaption class="label">Strip lights</figcaption></figure>
+    <figure class="shot"><div class="scene s-road"><img class="ph" src="img/frame-2.jpg" alt="" onerror="this.remove()"></div><figcaption class="label">Night highway</figcaption></figure>
+    <figure class="shot"><div class="scene s-canyon"><img class="ph" src="img/frame-3.jpg" alt="" onerror="this.remove()"></div><figcaption class="label">Red Rock</figcaption></figure>
+    <figure class="shot"><div class="scene s-desert"><img class="ph" src="img/frame-4.jpg" alt="" onerror="this.remove()"></div><figcaption class="label">Valley of Fire</figcaption></figure>
+    <figure class="shot"><div class="scene s-peak"><img class="ph" src="img/frame-5.jpg" alt="" onerror="this.remove()"></div><figcaption class="label">High country</figcaption></figure>
+    <figure class="shot"><div class="scene s-coast"><img class="ph" src="img/frame-6.jpg" alt="" onerror="this.remove()"></div><figcaption class="label">Cold morning</figcaption></figure>
+  </div>
+</section>
+
+<!-- SHELF -->
+<section class="sec" id="shelf">
+  <div class="wrap">
+    <p class="kicker rv">What Fuels the Miles</p>
+    <h2 class="big rv">Leadership books<br>I keep coming back to.</h2>
+    <div style="margin-top:42px">
+      <div class="book rv"><span class="n">01</span><h3>Leaders Eat Last<small>Simon Sinek</small></h3><span class="tag">why teams trust</span></div>
+      <div class="book rv"><span class="n">02</span><h3>Extreme Ownership<small>Jocko Willink &amp; Leif Babin</small></h3><span class="tag">no bad teams</span></div>
+      <div class="book rv"><span class="n">03</span><h3>Dare to Lead<small>Brené Brown</small></h3><span class="tag">courage over comfort</span></div>
+      <div class="book rv"><span class="n">04</span><h3>Good to Great<small>Jim Collins</small></h3><span class="tag">the flywheel</span></div>
+      <div class="book rv"><span class="n">05</span><h3>Start With Why<small>Simon Sinek</small></h3><span class="tag">lead with purpose</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- INSTAGRAM — photos: img/ig-1.jpg ... img/ig-6.jpg -->
+<section class="sec insta" id="insta">
+  <div class="wrap">
+    <p class="kicker rv" style="justify-content:center">Live from the road</p>
+    <h2 class="rv">See the rest on Instagram.</h2>
+    <p class="handle rv">@hey.dhruv.io</p>
+    <div class="ig rv d1">
+      <a href="https://www.instagram.com/hey.dhruv.io/" aria-label="Instagram"><div class="scene s-vegas"><img class="ph" src="img/ig-1.jpg" alt="" onerror="this.remove()"></div></a>
+      <a href="https://www.instagram.com/hey.dhruv.io/" aria-label="Instagram"><div class="scene s-road"><img class="ph" src="img/ig-2.jpg" alt="" onerror="this.remove()"></div></a>
+      <a href="https://www.instagram.com/hey.dhruv.io/" aria-label="Instagram"><div class="scene s-canyon"><img class="ph" src="img/ig-3.jpg" alt="" onerror="this.remove()"></div></a>
+      <a href="https://www.instagram.com/hey.dhruv.io/" aria-label="Instagram"><div class="scene s-desert"><img class="ph" src="img/ig-4.jpg" alt="" onerror="this.remove()"></div></a>
+      <a href="https://www.instagram.com/hey.dhruv.io/" aria-label="Instagram"><div class="scene s-peak"><img class="ph" src="img/ig-5.jpg" alt="" onerror="this.remove()"></div></a>
+      <a href="https://www.instagram.com/hey.dhruv.io/" aria-label="Instagram"><div class="scene s-coast"><img class="ph" src="img/ig-6.jpg" alt="" onerror="this.remove()"></div></a>
+    </div>
+    <a class="btn rv d2" href="https://www.instagram.com/hey.dhruv.io/">Follow @hey.dhruv.io &nbsp;→</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p class="line">Keep your tyres warm and your map a little wrong.</p>
+    <p class="meta"><b>hey.dhruv.io</b> &nbsp;·&nbsp; © <span id="yr"></span> Dhruv &nbsp;·&nbsp; <a href="#" style="color:var(--ice)">back to the top ↑</a></p>
+  </div>
+</footer>
+
+<script>
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.getElementById('yr').textContent = new Date().getFullYear();
+  const nav = document.getElementById('nav');
+  const onNav = ()=> nav.classList.toggle('solid', scrollY > 40);
+  onNav(); addEventListener('scroll', onNav, {passive:true});
+
+  const io = new IntersectionObserver((es)=>{ es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} }); },{threshold:.18});
+  document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+
+  const counters = document.querySelectorAll('.count');
+  let counted = false;
+  function runCounts(){ if(counted) return; counted = true;
+    counters.forEach(c=>{ const to=+c.dataset.to, dur=1400, t0=performance.now(), fmt=n=>n.toLocaleString('en-US');
+      if(reduce){ c.textContent=fmt(to); return; }
+      (function step(t){ const p=Math.min(1,(t-t0)/dur), e=1-Math.pow(1-p,3); c.textContent=fmt(Math.round(to*e)); if(p<1) requestAnimationFrame(step); })(t0); }); }
+
+  const pin=document.getElementById('journey'), scenes=pin.querySelectorAll('[data-scene]'), panels=pin.querySelectorAll('[data-panel]'),
+        pbar=document.getElementById('pbar'), parallaxEls=document.querySelectorAll('[data-parallax]'), heroIn=document.getElementById('heroIn');
+  let ticking=false;
+  function setActive(i){ scenes.forEach((s,k)=>s.classList.toggle('on',k===i)); panels.forEach((p,k)=>p.classList.toggle('on',k===i)); if(i===0) runCounts(); }
+  setActive(0);
+  function frame(){ ticking=false; const y=scrollY, vh=innerHeight;
+    if(heroIn && !reduce){ const hp=Math.min(1,y/vh); heroIn.style.transform=`translateY(${hp*60}px)`; heroIn.style.opacity=String(1-hp*0.9); }
+    const rect=pin.getBoundingClientRect(), total=pin.offsetHeight-vh, prog=Math.min(1,Math.max(0,-rect.top/total));
+    pbar.style.width=(prog*100)+'%';
+    const idx=Math.min(scenes.length-1,Math.floor(prog*scenes.length-1e-6)); setActive(Math.max(0,idx));
+    if(!reduce){ parallaxEls.forEach(el=>{ const r=el.parentElement.getBoundingClientRect(); const off=(r.top+r.height/2-vh/2)/vh; el.style.transform=`translateY(${off*-7}%) scale(1.18)`; }); } }
+  addEventListener('scroll',()=>{ if(!ticking){ ticking=true; requestAnimationFrame(frame);} },{passive:true});
+  addEventListener('resize',frame,{passive:true}); frame();
+
+  const reel=document.getElementById('reel'); let down=false,startX,startL,moved;
+  reel.addEventListener('pointerdown',e=>{ down=true;moved=false;startX=e.clientX;startL=reel.scrollLeft;reel.classList.add('drag');reel.setPointerCapture(e.pointerId); });
+  reel.addEventListener('pointermove',e=>{ if(!down)return; const dx=e.clientX-startX; if(Math.abs(dx)>4)moved=true; reel.scrollLeft=startL-dx; });
+  const end=()=>{ down=false; reel.classList.remove('drag'); };
+  reel.addEventListener('pointerup',end); reel.addEventListener('pointercancel',end);
+  reel.addEventListener('click',e=>{ if(moved) e.preventDefault(); },true);
+</script>
+</body>
+</html>
