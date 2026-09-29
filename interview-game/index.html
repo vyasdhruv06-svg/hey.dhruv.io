@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Interview Quest</title>
+<meta name="description" content="A practice game: face an AI-style interviewer, answer by typing or voice, get scored, level up." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#08090E; --panel:#0E1119; --panel-2:#141926;
+    --line:rgba(150,162,186,.12); --line-2:rgba(150,162,186,.24);
+    --text:#ECEEF4; --muted:#8A93A6;
+    --hot:#FF6A3D; --ice:#39DAD8; --good:#5BE49B; --bad:#FF5C7A;
+    --disp:'Space Grotesk', system-ui, sans-serif;
+    --body:'Inter', system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ink);color:var(--text);font-family:var(--body);line-height:1.6;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:var(--disp);margin:0;line-height:1.15}
+  button{font:inherit;cursor:pointer}
+  .wrap{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+  header.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:24px}
+  .brand{font-family:var(--disp);font-weight:700;font-size:20px}
+  .brand span{color:var(--hot)}
+  .stats{display:flex;gap:8px;flex-wrap:wrap;font-size:13px}
+  .chip{border:1px solid var(--line-2);border-radius:999px;padding:4px 12px;background:var(--panel);color:var(--muted)}
+  .chip b{color:var(--text)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:16px}
+  .lead{color:var(--muted);margin:8px 0 0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:16px}
+  .opt{background:var(--panel-2);border:1px solid var(--line-2);border-radius:12px;padding:14px;text-align:left;color:var(--text)}
+  .opt:hover,.opt.on{border-color:var(--hot)}
+  .opt.on{background:rgba(255,106,61,.1)}
+  .opt small{display:block;color:var(--muted);margin-top:2px}
+  .btn{background:var(--hot);color:#fff;border:0;border-radius:10px;padding:11px 20px;font-weight:600}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn.ghost{background:transparent;border:1px solid var(--line-2);color:var(--text)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+  .hidden{display:none!important}
+  label.sec{display:block;margin-top:18px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  /* interview */
+  .bar{height:6px;background:var(--panel-2);border-radius:99px;overflow:hidden}
+  .bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--hot),var(--ice));width:0;transition:width .3s}
+  .meta{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;margin:8px 0 14px}
+  .timer.low{color:var(--bad);font-weight:600}
+  .chat{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+  .msg{max-width:88%;padding:12px 14px;border-radius:14px;border:1px solid var(--line)}
+  .msg.iv{background:var(--panel-2);align-self:flex-start}
+  .msg.iv::before{content:"Interviewer";display:block;font-size:11px;color:var(--ice);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px}
+  .msg.me{background:rgba(255,106,61,.1);border-color:rgba(255,106,61,.3);align-self:flex-end;white-space:pre-wrap}
+  textarea{width:100%;min-height:130px;resize:vertical;background:var(--ink);color:var(--text);border:1px solid var(--line-2);border-radius:12px;padding:12px;font:inherit}
+  textarea:focus{outline:2px solid var(--ice);outline-offset:1px}
+  .hint{border:1px dashed var(--ice);border-radius:12px;padding:12px 14px;margin-top:12px;color:var(--ice);font-size:14px}
+  /* results */
+  .score{font-family:var(--disp);font-size:56px;font-weight:700;line-height:1}
+  .meters{display:grid;gap:10px;margin-top:16px}
+  .meter{display:grid;grid-template-columns:110px 1fr 44px;gap:10px;align-items:center;font-size:14px}
+  .list{margin:8px 0 0;padding-left:20px;color:var(--muted)}
+  .list b{color:var(--text)}
+  .ok{color:var(--good)} .miss{color:var(--bad)}
+  .model{background:var(--panel-2);border-left:3px solid var(--ice);padding:12px 14px;border-radius:8px;margin-top:10px;font-size:14px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  td,th{text-align:left;padding:6px 4px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:500}
+  footer{color:var(--muted);font-size:12px;text-align:center;margin-top:30px}
+  a.back{color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">Interview <span>Quest</span></div>
+    <div class="stats">
+      <span class="chip">Level <b id="sLevel">1</b></span>
+      <span class="chip">XP <b id="sXp">0</b></span>
+      <span class="chip">Streak <b id="sStreak">0</b></span>
+      <span class="chip">Best <b id="sBest">0</b></span>
+    </div>
+  </header>
+
+  <!-- SETUP -->
+  <section id="setup">
+    <div class="card">
+      <h1>Face the interviewer.</h1>
+      <p class="lead">A practice game. You answer five questions, the interviewer follows up on what you skipped, and you get scored on substance, structure, clarity, and delivery. Everything runs in your browser.</p>
+
+      <label class="sec">Track</label>
+      <div class="grid" id="tracks"></div>
+
+      <label class="sec">Difficulty</label>
+      <div class="grid" id="diffs"></div>
+
+      <div class="row">
+        <button class="btn" id="start">Start interview</button>
+        <button class="btn ghost" id="resetBtn">Reset progress</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Recent runs</h3>
+      <div id="history" style="margin-top:10px"></div>
+    </div>
+  </section>
+
+  <!-- INTERVIEW -->
+  <section id="play" class="hidden">
+    <div class="card">
+      <div class="bar"><i id="prog"></i></div>
+      <div class="meta"><span id="qCount"></span><span class="timer" id="timer"></span></div>
+      <div class="chat" id="chat"></div>
+      <textarea id="ans" placeholder="Type your answer… (Ctrl/Cmd+Enter to submit)"></textarea>
+      <div class="row">
+        <button class="btn" id="submit">Submit answer</button>
+        <button class="btn ghost" id="hintBtn">Hint (−5 pts)</button>
+        <button class="btn ghost" id="micBtn">🎙 Speak</button>
+        <button class="btn ghost" id="skipBtn">Skip</button>
+      </div>
+      <div class="hint hidden" id="hintBox"></div>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="results" class="hidden">
+    <div class="card">
+      <div class="score" id="finalScore"></div>
+      <p class="lead" id="verdict"></p>
+      <div class="row"><span class="chip" id="xpGain"></span><span class="chip" id="lvlUp"></span></div>
+      <div class="row">
+        <button class="btn" id="again">Play again</button>
+        <button class="btn ghost" id="menu">Change track</button>
+      </div>
+    </div>
+    <div id="review"></div>
+  </section>
+
+  <footer>Interview Quest — a practice simulator. Scoring is heuristic, so treat it as a coach, not a verdict.</footer>
+</div>
+
+<script>
+/* ---------- Question bank ----------
+   concepts: each is a list of phrases; answer "hits" a concept if it contains any.
+   star: behavioral questions also get a STAR-structure check. */
+const BANK = {
+  behavioral: {
+    name:'Behavioral', blurb:'Stories, teamwork, conflict',
+    questions:[
+      {d:0,q:"Tell me about a time you had to learn something quickly to get a job done.",star:true,
+       concepts:[["deadline","urgent","tight","quickly","short time"],["learn","docs","tutorial","course","read","practice"],["ask","mentor","colleague","teammate"],["result","shipped","delivered","outcome","success"]],
+       followup:"What would you do differently to learn even faster next time?",
+       hint:"Name the deadline, how you learned (docs, people, practice), and what shipped.",
+       model:"Situation: our team inherited a payments service in a language I didn't know, with a two-week deadline. Task: fix a critical bug. Action: I read the docs, paired with a teammate who knew it, and wrote small experiments. Result: shipped the fix in nine days and documented what I learned."},
+      {d:0,q:"Describe a project you're proud of. What was your role?",star:true,
+       concepts:[["i led","i built","i designed","my role","i was responsible","i owned"],["team","collaborat","stakeholder"],["challenge","problem","obstacle"],["impact","users","metric","%","result","increase","reduced"]],
+       followup:"What was the hardest trade-off you made on it?",
+       hint:"Be specific about YOUR part, then quantify the impact.",
+       model:"I owned the checkout redesign. The problem was a 68% cart drop-off. I ran user tests, simplified the form to one page, and coordinated with design and backend. Conversion rose 14% in a month."},
+      {d:1,q:"Tell me about a disagreement with a teammate and how you resolved it.",star:true,
+       concepts:[["disagree","conflict","different opinion","different view"],["listen","understand","perspective","empath"],["data","evidence","prototype","test","experiment"],["agree","compromise","aligned","resolved","decided"]],
+       followup:"What did you learn about working with that person?",
+       hint:"Show respect for the other view, use evidence, and end on a resolution.",
+       model:"A teammate wanted a rewrite; I preferred incremental fixes. I asked them to explain their concerns, we listed risks, and prototyped both for a day. Data favored a hybrid, we agreed on it, and shipped on time."},
+      {d:1,q:"Give an example of when you made a mistake at work. What happened next?",star:true,
+       concepts:[["mistake","error","bug","broke","failed","wrong"],["own","responsib","accountab","my fault","i should"],["fix","rollback","patch","resolve","recover"],["prevent","process","checklist","test","monitoring","learned","lesson"]],
+       followup:"How did you communicate it to your manager?",
+       hint:"Own it plainly, describe the fix, then the process change that prevents a repeat.",
+       model:"I deployed a migration without testing on production-sized data and it locked a table. I told my lead immediately, rolled back within 15 minutes, then added a staging dry-run step to our checklist."},
+      {d:2,q:"Tell me about a time you had to influence a decision without having authority.",star:true,
+       concepts:[["without authority","no authority","not my decision","didn't report","peer"],["data","evidence","prototype","case","numbers","proposal"],["stakeholder","buy-in","align","persuade","convince","influence"],["outcome","adopted","approved","result","impact"]],
+       followup:"What would you have done if they still said no?",
+       hint:"Explain how you built a case, found allies, and what changed as a result.",
+       model:"I wanted to adopt automated testing across teams I didn't manage. I ran a pilot on one service, showed a 40% drop in incidents, presented it to the leads, and got it adopted org-wide."}
+    ]},
+  frontend: {
+    name:'Frontend', blurb:'JS, CSS, browsers, perf',
+    questions:[
+      {d:0,q:"What is the difference between let, const, and var?",
+       concepts:[["block scope","block-scoped","blocked scope"],["function scope","function-scoped"],["hoist"],["reassign","immutable","cannot be reassigned","can't be reassigned"],["temporal dead zone","tdz"]],
+       followup:"Does const make an object immutable?",
+       hint:"Think scope, hoisting, and reassignment.",
+       model:"var is function-scoped and hoisted (initialized as undefined). let and const are block-scoped and live in the temporal dead zone until declared. const forbids reassignment but doesn't freeze object contents."},
+      {d:0,q:"Explain the CSS box model.",
+       concepts:[["content"],["padding"],["border"],["margin"],["box-sizing","border-box"]],
+       followup:"When would you use box-sizing: border-box?",
+       hint:"Four layers, from the inside out.",
+       model:"Every element is content, padding, border, and margin. With content-box, width covers only content; with border-box it includes padding and border, which makes sizing predictable."},
+      {d:1,q:"How does the event loop work in JavaScript?",
+       concepts:[["single-thread","single thread","one thread"],["call stack","stack"],["queue","task queue","callback queue"],["microtask","promise"],["web api","browser api","async"]],
+       followup:"Which runs first: a promise callback or setTimeout(0)?",
+       hint:"Stack, queues, and which queue has priority.",
+       model:"JS runs on one thread with a call stack. Async work is handled by browser APIs, whose callbacks go into task queues. The loop moves them onto the stack when it's empty, and microtasks (promises) run before the next macrotask like setTimeout."},
+      {d:1,q:"How would you improve the performance of a slow web page?",
+       concepts:[["measure","lighthouse","profil","core web vitals","devtools"],["lazy","defer","code split","split"],["cache","cdn","compress","minif"],["image","webp","avif","size"],["render","layout","reflow","paint","main thread"]],
+       followup:"How would you decide what to fix first?",
+       hint:"Measure first, then network, then rendering.",
+       model:"Measure with Lighthouse and the performance panel. Reduce payload with compression, minification, code-splitting and modern image formats. Cache via CDN, lazy-load offscreen content, and avoid layout thrash on the main thread. Fix the biggest measured bottleneck first."},
+      {d:2,q:"Explain how React reconciliation and keys work, and why keys matter.",
+       concepts:[["virtual dom","vdom"],["diff","reconcil","compare"],["key"],["unique","stable","identity"],["index","reorder","state"]],
+       followup:"What bug appears if you use array index as key in a reorderable list?",
+       hint:"Diffing, identity, and what breaks when order changes.",
+       model:"React builds a virtual tree and diffs it against the previous one. Keys give list items a stable identity so React can match, move, and preserve state. Index keys break when items reorder, mismatching state to the wrong element."}
+    ]},
+  backend: {
+    name:'Backend', blurb:'APIs, data, scale',
+    questions:[
+      {d:0,q:"What is the difference between SQL and NoSQL databases?",
+       concepts:[["schema","structured","relational"],["join","acid","transaction"],["scale","horizontal","shard"],["document","key-value","key value","graph","flexible"],["use case","depends","trade-off","tradeoff"]],
+       followup:"Which would you choose for a social feed and why?",
+       hint:"Structure, guarantees, scaling, and 'it depends'.",
+       model:"SQL databases are relational with strict schemas, joins and ACID transactions. NoSQL covers document, key-value and graph stores with flexible schemas and easier horizontal scaling. Choose by access patterns and consistency needs."},
+      {d:0,q:"What makes an API RESTful?",
+       concepts:[["resource","noun","url"],["get","post","put","delete","http method","verb"],["stateless"],["status code","200","404","500"],["json","representation"]],
+       followup:"What's the difference between PUT and PATCH?",
+       hint:"Resources, verbs, statelessness.",
+       model:"REST models resources as URLs, uses HTTP methods for actions, is stateless between requests, returns meaningful status codes, and exchanges representations such as JSON."},
+      {d:1,q:"How would you design a rate limiter?",
+       concepts:[["token bucket","leaky bucket","sliding window","fixed window"],["redis","counter","in-memory","store"],["ip","user","api key","client"],["429","too many requests","retry-after","retry"],["distributed","multiple servers","race","atomic"]],
+       followup:"How does it behave across multiple servers?",
+       hint:"Algorithm, storage, identity, response.",
+       model:"Use a token bucket or sliding window keyed by user or API key. Store counters in Redis with atomic increments so multiple servers share state. On limit, return 429 with a Retry-After header."},
+      {d:1,q:"Explain database indexing and its trade-offs.",
+       concepts:[["b-tree","btree","tree","hash"],["faster","speed up","lookup","query"],["write","insert","update","slower"],["storage","space","memory"],["composite","selectivity","cardinality","explain"]],
+       followup:"How would you tell if an index is being used?",
+       hint:"What it speeds up, what it costs.",
+       model:"An index, usually a B-tree, lets the database find rows without scanning the table, making reads fast. The cost is slower writes and extra storage. Composite indexes and selectivity matter; use EXPLAIN to check usage."},
+      {d:2,q:"How would you design a URL shortener that handles millions of requests per day?",
+       concepts:[["hash","base62","counter","id generation","unique id"],["database","key-value","store"],["cache","redis","cdn"],["redirect","301","302"],["scale","shard","replica","load balancer","partition"],["collision","analytics","expire"]],
+       followup:"How would you avoid collisions?",
+       hint:"ID generation, storage, caching, redirects, scale.",
+       model:"Generate unique IDs (counter → base62), store mapping in a key-value store, cache hot links in Redis/CDN, redirect with 301/302, and scale with sharding, replicas and load balancers. Handle collisions and optionally expiry and analytics."}
+    ]},
+  product: {
+    name:'Product', blurb:'Metrics, strategy, trade-offs',
+    questions:[
+      {d:0,q:"How do you decide what to build next?",
+       concepts:[["user","customer","problem"],["impact","value","roi"],["effort","cost","complexity"],["prioriti","framework","rice","ice"],["data","metric","feedback","research"]],
+       followup:"How do you handle a stakeholder pushing a different priority?",
+       hint:"Problem, impact vs. effort, and evidence.",
+       model:"Start from user problems backed by research and data, estimate impact and effort with a framework like RICE, and align stakeholders on the reasoning before committing."},
+      {d:1,q:"What metrics would you track for a new messaging feature?",
+       concepts:[["activation","adoption","dau","mau","active"],["retention","churn","return"],["engagement","messages sent","frequency"],["north star","goal","success"],["guardrail","latency","spam","report"]],
+       followup:"How would you tell if it's cannibalizing another feature?",
+       hint:"Adoption, retention, engagement, plus guardrails.",
+       model:"Define a north-star like weekly active senders. Track activation, retention, and engagement depth, with guardrail metrics like spam reports and latency to make sure growth isn't harmful."},
+      {d:2,q:"Usage on your main feature dropped 15% week over week. What do you do?",
+       concepts:[["verify","data quality","tracking","instrumentation","bug"],["segment","cohort","platform","region"],["release","deploy","change","external","seasonal"],["hypothes","root cause"],["fix","mitigate","rollback","experiment"]],
+       followup:"What would make you decide it's a real trend and not noise?",
+       hint:"Verify data, segment, correlate with changes, hypothesize, act.",
+       model:"First verify the data isn't a tracking bug. Then segment by platform, region and cohort, check recent releases and external factors, form hypotheses to find root cause, and mitigate or roll back while testing a fix."}
+    ]}
+};
+const DIFFS=[{k:0,name:'Rookie',blurb:'Easier questions · 150s each · ×1',time:150,mult:1},
+             {k:1,name:'Pro',blurb:'Mixed · 120s each · ×1.5',time:120,mult:1.5},
+             {k:2,name:'Boss',blurb:'Hardest · 90s each · ×2',time:90,mult:2}];
+const FILLERS=["um","uh","like","you know","basically","actually","literally","kind of","sort of"];
+const ROUNDS=5;
+
+/* ---------- state ---------- */
+const $=id=>document.getElementById(id);
+const store={
+  get(){try{return JSON.parse(localStorage.getItem('iq-save'))||{}}catch{return{}}},
+  set(v){try{localStorage.setItem('iq-save',JSON.stringify(v))}catch{}}
+};
+let save=Object.assign({xp:0,streak:0,best:0,history:[]},store.get());
+let sel={track:'behavioral',diff:0};
+let run=null, timerId=null;
+
+const levelOf=xp=>1+Math.floor(xp/300);
+
+function renderStats(){
+  $('sLevel').textContent=levelOf(save.xp);$('sXp').textContent=save.xp;
+  $('sStreak').textContent=save.streak;$('sBest').textContent=save.best;
+}
+function renderSetup(){
+  $('tracks').innerHTML=Object.entries(BANK).map(([k,t])=>
+    `<button class="opt ${sel.track===k?'on':''}" data-t="${k}"><b>${t.name}</b><small>${t.blurb}</small></button>`).join('');
+  $('diffs').innerHTML=DIFFS.map(d=>
+    `<button class="opt ${sel.diff===d.k?'on':''}" data-d="${d.k}"><b>${d.name}</b><small>${d.blurb}</small></button>`).join('');
+  document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{sel.track=b.dataset.t;renderSetup()});
+  document.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{sel.diff=+b.dataset.d;renderSetup()});
+  const h=save.history.slice(-6).reverse();
+  $('history').innerHTML=h.length?`<table><tr><th>Track</th><th>Level</th><th>Score</th><th>Date</th></tr>${
+    h.map(r=>`<tr><td>${esc(r.track)}</td><td>${esc(r.diff)}</td><td>${r.score}</td><td>${esc(r.date)}</td></tr>`).join('')}</table>`
+    :'<p class="lead">No runs yet. Your first interview is waiting.</p>';
+  renderStats();
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function show(id){['setup','play','results'].forEach(s=>$(s).classList.toggle('hidden',s!==id));window.scrollTo(0,0)}
+
+/* ---------- picking questions ---------- */
+function pickQuestions(track,diff){
+  const all=BANK[track].questions.slice();
+  // sort by closeness to chosen difficulty, random tie-break, keep ROUNDS
+  all.sort((a,b)=>Math.abs(a.d-diff)-Math.abs(b.d-diff)||Math.random()-.5);
+  return all.slice(0,ROUNDS).sort((a,b)=>a.d-b.d);
+}
+
+/* ---------- scoring ---------- */
+function words(t){return t.trim()?t.trim().split(/\s+/):[]}
+function scoreAnswer(text,q,extra){
+  const lower=(' '+text.toLowerCase()+' ');
+  const w=words(text);
+  const hit=[],miss=[];
+  q.concepts.forEach(c=>{(c.some(p=>lower.includes(p))?hit:miss).push(c)});
+  const substance=Math.round(hit.length/q.concepts.length*100);
+
+  let structure;
+  if(q.star){
+    const marks=[/situation|context|when i|at my|we were|the team/,/task|goal|needed to|responsib|my role|had to/,/i (decided|built|wrote|led|ran|created|asked|worked|talked|set up|proposed)|action|so i/,/result|outcome|as a result|ended up|in the end|%|shipped|delivered/];
+    const s=marks.filter(m=>m.test(lower)).length;
+    structure=Math.round(s/4*100);
+  }else{
+    const conn=(lower.match(/\b(first|second|then|because|therefore|so that|for example|for instance|trade-?off|however|finally|in short)\b/g)||[]).length;
+    structure=Math.min(100,25+conn*20);
+  }
+
+  const n=w.length;
+  const clarity=n<15?15:n<35?45:n<=170?100:Math.max(50,100-(n-170)*.5);
+
+  let fillers=0;FILLERS.forEach(f=>{fillers+=(lower.match(new RegExp('\\b'+f+'\\b','g'))||[]).length});
+  const fillerRate=n?fillers/n:0;
+  const delivery=Math.max(30,Math.round(100-fillerRate*600));
+
+  let base=substance*.5+structure*.2+clarity*.2+delivery*.1;
+  base=Math.min(100,Math.round(base)) - extra.hintPenalty;
+  const timeBonus=extra.timeLeft>extra.timeTotal*.5?3:0;
+  base=Math.max(0,Math.min(100,base+timeBonus));
+  return {total:base,substance,structure,clarity:Math.round(clarity),delivery,hit,miss,fillers,n};
+}
+
+/* ---------- interview flow ---------- */
+function startRun(){
+  const diff=DIFFS[sel.diff];
+  run={track:sel.track,diff,qs:pickQuestions(sel.track,sel.diff),i:0,stage:'main',
+       hintPenalty:0,results:[],text:'',stopAt:0};
+  $('chat').innerHTML='';
+  show('play');
+  say('iv',`Hi! Thanks for coming in today. We'll do ${ROUNDS} questions for the ${BANK[sel.track].name} track. Ready? Let's begin.`);
+  askCurrent();
+}
+function say(who,t){
+  const d=document.createElement('div');d.className='msg '+who;d.textContent=t;
+  $('chat').appendChild(d);d.scrollIntoView({block:'nearest'});
+}
+function askCurrent(){
+  const q=run.qs[run.i];
+  run.stage='main';run.text='';run.hintPenalty=0;
+  $('hintBox').classList.add('hidden');$('hintBtn').disabled=false;
+  $('ans').value='';$('ans').disabled=false;$('ans').focus();
+  $('qCount').textContent=`Question ${run.i+1} of ${run.qs.length}`;
+  $('prog').style.width=(run.i/run.qs.length*100)+'%';
+  say('iv',q.q);
+  startTimer();
+}
+function startTimer(){
+  clearInterval(timerId);
+  run.timeLeft=run.diff.time;run.timeTotal=run.diff.time;
+  paintTimer();
+  timerId=setInterval(()=>{run.timeLeft--;paintTimer();if(run.timeLeft<=0){clearInterval(timerId);submit(true)}},1000);
+}
+function paintTimer(){
+  const t=$('timer');t.textContent='⏱ '+run.timeLeft+'s';t.classList.toggle('low',run.timeLeft<=15);
+}
+function submit(auto){
+  clearInterval(timerId);stopMic();
+  const q=run.qs[run.i];
+  const typed=$('ans').value.trim();
+  if(typed)say('me',typed);
+  else say('me','(no answer)');
+  run.text=(run.text+' '+typed).trim();
+
+  if(run.stage==='main'){
+    const partial=scoreAnswer(run.text,q,{hintPenalty:run.hintPenalty,timeLeft:run.timeLeft,timeTotal:run.timeTotal});
+    if(typed&&partial.miss.length&&!auto){
+      run.stage='follow';
+      say('iv',q.followup);
+      $('ans').value='';$('ans').focus();
+      run.timeLeft=Math.min(60,run.diff.time);run.timeTotal=run.timeLeft;
+      paintTimer();
+      timerId=setInterval(()=>{run.timeLeft--;paintTimer();if(run.timeLeft<=0){clearInterval(timerId);submit(true)}},1000);
+      return;
+    }
+  }
+  finishQuestion(q);
+}
+function finishQuestion(q){
+  const sc=scoreAnswer(run.text,q,{hintPenalty:run.hintPenalty,timeLeft:run.timeLeft,timeTotal:run.timeTotal});
+  run.results.push({q,answer:run.text,sc});
+  const comment=sc.total>=80?"Strong answer, thank you.":sc.total>=55?"Okay, thanks. Let's move on.":"Alright, noted. Next question.";
+  say('iv',comment);
+  run.i++;
+  if(run.i>=run.qs.length){$('ans').disabled=true;setTimeout(finishRun,700)}
+  else setTimeout(askCurrent,700);
+}
+function finishRun(){
+  const avg=Math.round(run.results.reduce((a,r)=>a+r.sc.total,0)/run.results.length);
+  const gained=Math.round(avg*run.diff.mult*(1+Math.min(save.streak,5)*.1));
+  const oldLvl=levelOf(save.xp);
+  save.xp+=gained;
+  save.streak=avg>=60?save.streak+1:0;
+  save.best=Math.max(save.best,avg);
+  save.history.push({track:BANK[run.track].name,diff:run.diff.name,score:avg,date:new Date().toLocaleDateString()});
+  save.history=save.history.slice(-30);
+  store.set(save);
+  renderStats();
+
+  $('finalScore').textContent=avg+'/100';
+  $('verdict').textContent=avg>=85?"Offer on the table. That was an excellent interview."
+    :avg>=70?"Solid. You'd advance to the next round."
+    :avg>=50?"Borderline. A few sharper answers would tip it."
+    :"Not yet. Review the model answers below and try again.";
+  $('xpGain').textContent='+'+gained+' XP';
+  const nl=levelOf(save.xp);
+  $('lvlUp').textContent=nl>oldLvl?'🎉 Level up! Now level '+nl:'Streak: '+save.streak;
+
+  $('review').innerHTML=run.results.map((r,i)=>{
+    const s=r.sc;
+    const m=(l,v)=>`<div class="meter"><span>${l}</span><div class="bar"><i style="width:${v}%"></i></div><b>${v}</b></div>`;
+    return `<div class="card"><h3>Q${i+1}. ${esc(r.q.q)}</h3>
+      <div class="meters">${m('Substance',s.substance)}${m('Structure',s.structure)}${m('Clarity',s.clarity)}${m('Delivery',s.delivery)}</div>
+      <p style="margin:12px 0 0"><b>Score ${s.total}</b> · ${s.n} words${s.fillers?` · ${s.fillers} filler word${s.fillers>1?'s':''}`:''}</p>
+      <ul class="list">
+        ${s.hit.map(c=>`<li class="ok">✓ Covered: <b>${esc(c[0])}</b></li>`).join('')}
+        ${s.miss.map(c=>`<li class="miss">✗ Missed: <b>${esc(c[0])}</b></li>`).join('')}
+      </ul>
+      <div class="model"><b>Model answer:</b> ${esc(r.q.model)}</div></div>`;
+  }).join('');
+  $('prog').style.width='100%';
+  show('results');
+}
+
+/* ---------- hint / skip / voice ---------- */
+$('hintBtn').onclick=()=>{
+  const q=run.qs[run.i];
+  run.hintPenalty=5;
+  $('hintBox').textContent='💡 '+q.hint;
+  $('hintBox').classList.remove('hidden');
+  $('hintBtn').disabled=true;
+};
+$('skipBtn').onclick=()=>{
+  clearInterval(timerId);stopMic();
+  const q=run.qs[run.i];
+  say('me','(skipped)');
+  run.text='';
+  finishQuestion(q);
+};
+$('submit').onclick=()=>submit(false);
+$('ans').addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter')submit(false)});
+
+let rec=null;
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(!SR)$('micBtn').classList.add('hidden');
+$('micBtn').onclick=()=>{rec?stopMic():startMic()};
+function startMic(){
+  rec=new SR();rec.continuous=true;rec.interimResults=true;rec.lang='en-US';
+  const base=$('ans').value?$('ans').value+' ':'';
+  rec.onresult=e=>{
+    let t='';for(const r of e.results)t+=r[0].transcript;
+    $('ans').value=base+t;
+  };
+  rec.onend=()=>{rec=null;$('micBtn').textContent='🎙 Speak'};
+  rec.onerror=()=>stopMic();
+  try{rec.start();$('micBtn').textContent='⏹ Stop'}catch{rec=null}
+}
+function stopMic(){if(rec){try{rec.stop()}catch{}}rec=null;$('micBtn').textContent='🎙 Speak'}
+
+/* ---------- nav ---------- */
+$('start').onclick=startRun;
+$('again').onclick=startRun;
+$('menu').onclick=()=>{renderSetup();show('setup')};
+$('resetBtn').onclick=()=>{
+  if(confirm('Reset all XP, streak, and history?')){
+    save={xp:0,streak:0,best:0,history:[]};store.set(save);renderSetup();
+  }
+};
+renderSetup();
+</script>
+</body>
+</html>
